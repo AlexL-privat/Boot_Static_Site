@@ -5,7 +5,7 @@ from markdown_extract import extract_title
 from converter import markdown_to_html_node
 
 
-def generate_page(from_path: str, template_path: str, dest_path: str, logger: Callable[[str], None] = print):
+def generate_page(from_path: str, template_path: str, dest_path: str, basepath: str = '/', logger: Callable[[str], None] = print):
     """
     Generate an HTML page by converting a markdown file to HTML and injecting it into a template.
 
@@ -35,6 +35,14 @@ def generate_page(from_path: str, template_path: str, dest_path: str, logger: Ca
     # Replace placeholders
     page = template.replace("{{ Title }}", title).replace("{{ Content }}", content_html)
 
+    # Normalize basepath to always end with a slash
+    if not basepath.endswith('/'):
+        basepath = basepath + '/'
+
+    # Replace absolute references to root ("/...") with basepath-prefixed paths
+    page = page.replace('href="/', f'href="{basepath}')
+    page = page.replace('src="/', f'src="{basepath}')
+
     # Ensure destination directory exists
     dest_dir = os.path.dirname(dest_path)
     if dest_dir:
@@ -47,7 +55,7 @@ def generate_page(from_path: str, template_path: str, dest_path: str, logger: Ca
     logger(f"Wrote {dest_path}")
 
 
-def generate_pages_recursive(dir_path_content: str, template_path: str, dest_dir_path: str, logger: Callable[[str], None] = print):
+def generate_pages_recursive(dir_path_content: str, template_path: str, dest_dir_path: str, basepath: str = '/', logger: Callable[[str], None] = print):
     """
     Walk `dir_path_content` and generate an HTML page for every markdown file found.
 
@@ -75,5 +83,5 @@ def generate_pages_recursive(dir_path_content: str, template_path: str, dest_dir
             if dest_parent:
                 os.makedirs(dest_parent, exist_ok=True)
 
-            generate_page(src_path, template_path, dest_path, logger=logger)
+            generate_page(src_path, template_path, dest_path, basepath=basepath, logger=logger)
 
