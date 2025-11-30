@@ -1,5 +1,5 @@
 import unittest
-from markdown_extract import extract_markdown_images, extract_markdown_links, markdown_to_blocks, block_to_block_type, BlockType
+from markdown_extract import extract_markdown_images, extract_markdown_links, markdown_to_blocks, block_to_block_type, BlockType, extract_title
 
 
 class TestMarkdownExtract(unittest.TestCase):
@@ -247,6 +247,26 @@ class TestBlockToBlockType(unittest.TestCase):
     def test_paragraph_multiple_lines(self):
         block = "This is a paragraph\nwith multiple lines\nof text"
         self.assertEqual(block_to_block_type(block), BlockType.PARAGRAPH)
+
+
+class TestExtractTitle(unittest.TestCase):
+
+    def test_simple_title(self):
+        md = "# Hello"
+        self.assertEqual(extract_title(md), "Hello")
+
+    def test_title_with_whitespace(self):
+        md = "  #  My Title  \nSome text"
+        self.assertEqual(extract_title(md), "My Title")
+
+    def test_first_h1_taken(self):
+        md = "# First\n# Second\n"
+        self.assertEqual(extract_title(md), "First")
+
+    def test_no_h1_raises(self):
+        md = "## Not H1\nNo title here"
+        with self.assertRaises(ValueError):
+            extract_title(md)
 
 
 if __name__ == "__main__":

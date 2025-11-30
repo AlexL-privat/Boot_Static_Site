@@ -110,3 +110,24 @@ def block_to_block_type(block):
     
     # Default to paragraph
     return BlockType.PARAGRAPH
+
+
+def extract_title(markdown: str) -> str:
+    """
+    Extract the first H1 title (a line that starts with a single '# ')
+
+    Args:
+        markdown: Full markdown document string
+
+    Returns:
+        The title text with the leading '#' and surrounding whitespace removed
+
+    Raises:
+        ValueError: if no H1 title is found
+    """
+    for line in markdown.splitlines():
+        stripped = line.strip()
+        if stripped.startswith('# '):
+            return stripped[2:].strip()
+
+    raise ValueError("No H1 title found in markdown")
